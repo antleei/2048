@@ -1,5 +1,4 @@
 <script>
-import { Game } from '~/composables/game'
 export default {
     data() {
         return {

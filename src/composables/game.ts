@@ -1,4 +1,4 @@
-class Tile {
+export class Tile {
     value: number
     row: number
     column: number
@@ -52,7 +52,7 @@ class Tile {
     }
 }
 
-class Game {
+export class Game {
     tiles: Tile[]
     cells: Tile[][]
     won: boolean
@@ -87,28 +87,33 @@ class Game {
     }
 
     moveLeft() {
-        let hasChanged = false
+        let hasChanged: boolean | Tile | null = false
 
         for (let row = 0; row < this.size; row++) {
             const currentRow = this.cells[row].filter(tile => tile.value !== 0)
             const resultRow = []
 
             for (let target = 0; target < this.size; target++) {
-                let targetTile = currentRow.length ? currentRow.shift() : this.addTile()
+                let targetTile = currentRow.length ? currentRow.shift() as Tile : this.addTile()
 
-                if (currentRow.length > 0 && currentRow[0].value === targetTile?.value) {
+                if (currentRow.length > 0 && currentRow[0].value === targetTile.value) {
                     const score = currentRow[0].value + targetTile.value
                     this.score += score
+
                     const tileOne = targetTile
                     targetTile = this.addTile(targetTile.value)
                     tileOne.mergedInto = targetTile
+
                     const tileTwo = currentRow.shift()
-                    tileTwo.mergedInto = targetTile
-                    targetTile.value += tileTwo.value
+
+                    if (tileTwo) {
+                        tileTwo.mergedInto = targetTile
+                        targetTile.value += tileTwo.value
+                    }
                 }
+
                 resultRow[target] = targetTile
-                this.won = this.won || (targetTile.value === 2048)
-                // hasChanged |= (targetTile.value !== this.cells[row][target].value)
+                this.won = this.won || (targetTile?.value === 2048)
                 hasChanged = hasChanged || targetTile.hasMoved()
             }
             this.cells[row] = resultRow
@@ -180,7 +185,7 @@ class Game {
     }
 
     clearOldTiles() {
-        this.tiles = this.tiles.filter(tile => tile.markForDeletion === false)
+        this.tiles = this.tiles.filter(tile => !tile.markForDeletion)
         this.tiles.forEach((tile) => {
             tile.markForDeletion = true
         })
@@ -209,5 +214,3 @@ class Game {
         return !canMove
     }
 }
-
-export { Game }
